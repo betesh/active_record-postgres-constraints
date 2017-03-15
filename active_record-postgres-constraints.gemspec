@@ -1,16 +1,17 @@
-$:.push File.expand_path("../lib", __FILE__)
+# frozen_string_literal: true
+$LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 # Maintain your gem's version:
-require "active_record/postgres/constraints/version"
+require 'active_record/postgres/constraints/version'
 
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
-  s.name        = "active_record-postgres-constraints"
-  s.version     = ActiveRecord::Postgres::Constraints::VERSION
-  s.authors     = ["Isaac Betesh"]
-  s.email       = ["ibetesh@on-site.com"]
-  s.homepage    = "https://github.com/on-site/active_record-postgres-constraints"
-  s.summary     = "Store your constraints in db/schema.rb"
+  s.name = 'active_record-postgres-constraints'
+  s.version = ActiveRecord::Postgres::Constraints::VERSION
+  s.authors = ['Isaac Betesh']
+  s.email = ['ibetesh@on-site.com']
+  s.homepage = 'https://github.com/on-site/active_record-postgres-constraints'
+  s.summary = 'Store your constraints in db/schema.rb'
   s.description = %(
     From http://edgeguides.rubyonrails.org/active_record_migrations.html#types-of-schema-dumps:
 
@@ -24,12 +25,12 @@ Gem::Specification.new do |s|
     (:ruby) and still preserve your check constraints.
   )
 
-  s.license     = "MIT"
+  s.license = 'MIT'
 
-  s.files = Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md"]
+  s.files = Dir['{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md']
 
-  s.add_dependency "rails", "~> 5.0.2"
+  s.add_dependency 'rails', '~> 5.0.2'
 
-  s.add_development_dependency "sqlite3"
-  s.add_development_dependency "rubocop"
+  s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'rubocop'
 end

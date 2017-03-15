@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 begin
   require 'bundler/setup'
 rescue LoadError
@@ -8,16 +9,11 @@ require 'rdoc/task'
 
 RDoc::Task.new(:rdoc) do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'ActiveRecord::Postgres::Constraints'
+  rdoc.title = 'ActiveRecord::Postgres::Constraints'
   rdoc.options << '--line-numbers'
   rdoc.rdoc_files.include('README.md')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
-
-
-
-
-
 
 require 'bundler/gem_tasks'
 
@@ -29,6 +25,5 @@ Rake::TestTask.new(:test) do |t|
   t.pattern = 'test/**/*_test.rb'
   t.verbose = false
 end
-
 
 task default: :test

@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require_relative 'boot'
 
 require 'rails/all'
 
 Bundler.require(*Rails.groups)
-require "active_record/postgres/constraints"
+require 'active_record/postgres/constraints'
 
 module Dummy
   class Application < Rails::Application
@@ -12,4 +13,3 @@ module Dummy
     # -- all .rb files in that directory are automatically loaded.
   end
 end
-
