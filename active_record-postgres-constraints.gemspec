@@ -32,8 +32,8 @@ Gem::Specification.new do |s|
   ]
 
   s.add_dependency 'rails', '~> 5.0.2'
+  s.add_dependency 'pg'
 
-  s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'rubocop'
   s.add_development_dependency 'rspec-rails'
 end
