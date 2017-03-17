@@ -4,6 +4,7 @@ module ActiveRecord
     module Constraints
       class Railtie < Rails::Railtie
         initializer 'active_record.postgres.constraints.patch_active_record' do
+          ActiveSupport.on_load(:active_record) do
             AR_CAS = ::ActiveRecord::ConnectionAdapters
 
             connection = ActiveRecord::Base.connection
@@ -24,6 +25,7 @@ module ActiveRecord
                   'since the database is not postgres'
               end
             end
+          end
         end
       end
     end
