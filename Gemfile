@@ -13,4 +13,8 @@ gemspec
 
 # To use a debugger
 gem 'byebug', group: [:development, :test]
-gem 'simplecov', group: [:test], require: false
+
+group :test do
+  gem 'appraisal'
+  gem 'simplecov', require: false
+end

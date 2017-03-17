@@ -45,6 +45,10 @@ GEM
       i18n (~> 0.7)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
+    appraisal (2.1.0)
+      bundler
+      rake
+      thor (>= 0.14.0)
     arel (7.1.4)
     ast (2.3.0)
     builder (3.2.3)
@@ -126,7 +130,7 @@ GEM
       ruby-progressbar (~> 1.7)
       unicode-display_width (~> 1.0, >= 1.0.1)
     ruby-progressbar (1.8.1)
-    simplecov (0.13.0)
+    simplecov (0.14.0)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
@@ -152,10 +156,11 @@ PLATFORMS
 
 DEPENDENCIES
   active_record-postgres-constraints!
+  appraisal
   byebug
   rspec-rails
   rubocop
   simplecov
 
 BUNDLED WITH
-   1.13.7
+   1.14.6
