@@ -155,7 +155,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
               Regexp.new <<-EOS.strip_heredoc.indent(2)
                 create_table "prices", force: :cascade do \|t\|
                   t.integer "price"
-                  t.check_constraint :prices_[0-9]{9}, #{expected_constraint_string}
+                  t.check_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
                 end
               EOS
             end
