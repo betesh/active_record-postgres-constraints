@@ -1,5 +1,5 @@
 PATH
-  remote: ../
+  remote: ..
   specs:
     active_record-postgres-constraints (0.1.1)
       pg
@@ -164,4 +164,4 @@ DEPENDENCIES
   simplecov
 
 BUNDLED WITH
-   1.13.7
+   1.14.6

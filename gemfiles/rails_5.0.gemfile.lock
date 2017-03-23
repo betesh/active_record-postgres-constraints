@@ -1,5 +1,5 @@
 PATH
-  remote: ../
+  remote: ..
   specs:
     active_record-postgres-constraints (0.1.1)
       pg
