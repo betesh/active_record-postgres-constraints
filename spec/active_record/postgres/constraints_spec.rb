@@ -93,7 +93,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     shared_examples_for :adds_a_constraint do
       let(:expected_schema_regex) do
         Regexp.escape <<-EOS.strip_heredoc.indent(2)
-          create_table "prices", force: :cascade do |t|
+          create_table "prices", #{"id: :serial, " if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new("5.1.0")}force: :cascade do |t|
             t.integer "price"
             t.check_constraint :test_constraint, #{expected_constraint_string}
           end
