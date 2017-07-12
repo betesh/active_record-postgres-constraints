@@ -4,26 +4,28 @@ module ActiveRecord
   module Postgres
     module Constraints
       module CommandRecorder
-        def add_check_constraint(*args, &block)
-          record(:add_check_constraint, args, &block)
-        end
-
-        def invert_add_check_constraint(args, &block)
-          [:remove_check_constraint, args, block]
-        end
-
-        def remove_check_constraint(*args, &block)
-          if args.length < 3
-            raise ActiveRecord::IrreversibleMigration,
-              'To make this migration reversible, pass the constraint to '\
-              'remove_check_constraint, i.e. `remove_check_constraint, '\
-              "#{args[0].inspect}, #{args[1].inspect}, 'price > 999'`"
+        CONSTRAINT_TYPES.keys.each do |type|
+          define_method "add_#{type}_constraint" do |*args, &block|
+            record("add_#{type}_constraint".to_sym, args, &block)
           end
-          record(:remove_check_constraint, args, &block)
-        end
 
-        def invert_remove_check_constraint(args, &block)
-          [:add_check_constraint, args, block]
+          define_method "invert_add_#{type}_constraint" do |args, &block|
+            ["remove_#{type}_constraint".to_sym, args, block]
+          end
+
+          define_method "remove_#{type}_constraint" do |*args, &block|
+            if args.length < 3
+              raise ActiveRecord::IrreversibleMigration,
+                'To make this migration reversible, pass the constraint to '\
+                "remove_#{type}_constraint, i.e. `remove_#{type}_constraint, "\
+                "#{args[0].inspect}, #{args[1].inspect}, 'price > 999'`"
+            end
+            record("remove_#{type}_constraint".to_sym, args, &block)
+          end
+
+          define_method "invert_remove_#{type}_constraint" do |args, &block|
+            ["add_#{type}_constraint".to_sym, args, block]
+          end
         end
       end
     end

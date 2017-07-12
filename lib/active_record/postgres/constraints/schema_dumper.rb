@@ -10,9 +10,10 @@ module ActiveRecord
           return unless constraints.any?
 
           constraint_statements = constraints.map do |constraint|
-            name = constraint['conname']
-            conditions = constraint['consrc']
-            "    t.check_constraint :#{name}, #{conditions.inspect}"
+            type = CONSTRAINT_TYPES.key(constraint['contype'])
+            ActiveRecord::Postgres::Constraints.
+              class_for_constraint_type(type).
+              to_method(constraint)
           end
           stream.puts constraint_statements.sort.join("\n")
         end
