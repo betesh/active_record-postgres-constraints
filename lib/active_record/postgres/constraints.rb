@@ -5,6 +5,11 @@ module ActiveRecord
     module Constraints
       CONSTRAINT_TYPES = {
         check: 'c',
+        exclude: 'x',
+      }.freeze
+      OPERATOR_SYMBOLS = {
+        equals: '=',
+        overlaps: '&&',
       }.freeze
 
       module_function
@@ -18,6 +23,7 @@ module ActiveRecord
 end
 
 require_relative 'constraints/types/check'
+require_relative 'constraints/types/exclude'
 require_relative 'constraints/command_recorder'
 require_relative 'constraints/postgresql_adapter'
 require_relative 'constraints/railtie'
