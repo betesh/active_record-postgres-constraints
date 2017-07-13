@@ -39,7 +39,6 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
             t.integer #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"price"
             t.datetime "from"
             t.datetime "to"
-            t.index "tsrange(\\"from\\", \\"to\\"), price", name: "test_constraint", using: :gist
             t.exclude_constraint :test_constraint, using: :gist, 'tsrange("from", "to")' => :overlaps, price: :equals
           end
         MIGRATION
@@ -119,7 +118,6 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
                   t.integer  #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"price"
                   t.datetime "from"
                   t.datetime "to"
-                  t.index "tsrange(\\"from\\", \\"to\\"), price", name: "prices_[0-9]{7-9}", using: :gist
                   t.exclude_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
                 end
               MIGRATION
