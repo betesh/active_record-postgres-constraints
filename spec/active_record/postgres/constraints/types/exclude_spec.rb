@@ -39,7 +39,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
             t.integer #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"price"
             t.datetime "from"
             t.datetime "to"
-            t.exclude_constraint :test_constraint, using: :gist, 'tsrange("from", "to")' => :overlaps, price: :equals
+            t.exclude_constraint :test_constraint, #{expected_constraint_string}
           end
         MIGRATION
       end
@@ -58,8 +58,17 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
         )
         create_price.call(2.days.from_now, nil)
         create_price.call(Time.current, 2.days.from_now, 1)
+        if where_clause
+          create_price.call(Time.current, 2.days.from_now, 1)
+        else
+          expect { create_price.call(Time.current, 2.days.from_now, 1) }.to(
+            raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
+          )
+        end
       end
     end
+
+    let(:where_clause) { false }
 
     let(:expected_constraint_error_message) do
       'PG::ExclusionViolation: ERROR:  conflicting key value violates '\
@@ -88,10 +97,24 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
         end
         let(:expected_constraint_string) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-          ':price => :equals'
+          'price: :equals'
         end
 
         it_behaves_like 'adds a constraint'
+
+        context 'when a where clause is present' do
+          let(:where_clause) { true }
+          let(:constraint) do
+            'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
+            ':price => :equals, where: \'price <> 1\''
+          end
+          let(:expected_constraint_string) do
+            'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
+            'price: :equals, where: \'(price <> 1)\''
+          end
+
+          it_behaves_like 'adds a constraint'
+        end
 
         context 'when the constraint is anonymous' do
           let(:content_of_change_method) do
@@ -136,6 +159,24 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
         end
 
         it_behaves_like 'adds a constraint'
+
+        context 'when a where clause is present' do
+          let(:where_clause) { true }
+          let(:constraint) do
+            {
+              using: :gist,
+              'tsrange("from", "to")' => :overlaps,
+              price: :equals,
+              where: 'price <> 1',
+            }
+          end
+          let(:expected_constraint_string) do
+            'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
+            'price: :equals, where: \'(price <> 1)\''
+          end
+
+          it_behaves_like 'adds a constraint'
+        end
       end
     end
 
@@ -145,7 +186,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
       end
       let(:expected_constraint_string) do
         'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-        ':price => :equals'
+        'price: :equals'
       end
       let(:content_of_change_method) do
         <<-MIGRATION
@@ -160,6 +201,20 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
       end
 
       it_behaves_like 'adds a constraint'
+
+      context 'when a where clause is present' do
+        let(:where_clause) { true }
+        let(:constraint) do
+          'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
+            ':price => :equals, where: \'price <> 1\''
+        end
+        let(:expected_constraint_string) do
+          'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
+            'price: :equals, where: \'(price <> 1)\''
+        end
+
+        it_behaves_like 'adds a constraint'
+      end
 
       context 'when the constraint is removed in a later migration' do
         let(:content_of_change_method_for_removing_migration) do

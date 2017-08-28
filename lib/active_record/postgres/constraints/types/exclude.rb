@@ -14,8 +14,9 @@ module ActiveRecord
                 conditions = name_or_conditions
               end
               using = "USING #{conditions[:using]} " if conditions[:using]
+              w = " WHERE (#{conditions[:where]})" if conditions[:where]
               "CONSTRAINT #{name} EXCLUDE #{using}"\
-              "(#{normalize_conditions(conditions.except(:using))})"
+              "(#{normalize_conditions(conditions.except(:using, :where))})#{w}"
             end
 
             def to_method(constraint)
@@ -23,16 +24,19 @@ module ActiveRecord
               definition = constraint['definition']
               using_type = definition.match(/USING (\w*)/).try(:[], 1)
               using = "using: :#{using_type}, " if using_type
+              where_clause = definition.match(/WHERE \((.*)\)/).try(:[], 1)
+              where = ", where: '#{where_clause}'" if where_clause
               exclusions =
                 definition_to_exclusions(definition).
                   join(', ')
-              "    t.exclude_constraint :#{name}, #{using}#{exclusions}"
+              "    t.exclude_constraint :#{name}, #{using}#{exclusions}#{where}"
             end
 
             private
 
             def definition_to_exclusions(definition)
               definition.
+                split(' WHERE')[0].
                 match(/\((.*)/)[1].
                 chomp(')').
                 scan(/((?:[^,(]+|(?:\((?>[^()]+|\g<-1>)*\)))+)/).
