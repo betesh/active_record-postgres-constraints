@@ -28,7 +28,7 @@ module ActiveRecord
         def pg?
           begin
             connection = ActiveRecord::Base.connection
-          rescue ActiveRecord::NoDatabaseError
+          rescue ActiveRecord::NoDatabaseError, PG::ConnectionBad
             Rails.logger.warn do
               'Not applying Postgres Constraints patches to ActiveRecord ' \
                 'since the database does not exist'
