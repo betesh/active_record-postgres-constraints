@@ -61,14 +61,22 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     end
 
     def run_migrations
-      ActiveRecord::Tasks::DatabaseTasks.migrate
+      if defined?(ActiveRecord::Base.connection.migration_context)
+        ActiveRecord::Base.connection.migration_context.migrate
+      else
+        ActiveRecord::Tasks::DatabaseTasks.migrate
+      end
       dump_schema
     end
 
     def rollback
-      ActiveRecord::Migrator.rollback(
-        ActiveRecord::Tasks::DatabaseTasks.migrations_paths, 1
-      )
+      if defined?(ActiveRecord::MigrationContext)
+        ActiveRecord::Base.connection.migration_context.rollback(1)
+      else
+        ActiveRecord::Migrator.rollback(
+          ActiveRecord::Tasks::DatabaseTasks.migrations_paths, 1
+        )
+      end
       dump_schema
     end
 
