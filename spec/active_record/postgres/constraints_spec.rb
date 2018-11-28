@@ -71,7 +71,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       dump_schema
     end
 
-    before(:each) do
+    before do
       cleanup_database
 
       generate_migration('20170101120000', Random.rand(1..1000)) do
@@ -81,12 +81,14 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       run_migrations
     end
 
-    after(:each) do
+    after do
       rollback
       delete_all_migration_files
     end
 
+    # rubocop:disable RSpec/BeforeAfterAll
     after(:all) do
+      # rubocop:enable RSpec/BeforeAfterAll
       cleanup_database
       dump_schema
     end
@@ -120,7 +122,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
     let(:expected_error_regex) { /\A#{expected_constraint_error_message}/ }
 
-    context 'using `t.check_constraint`' do
+    context 'when using `t.check_constraint`' do
       let(:content_of_change_method) do
         <<-EOM
           create_table :prices do |t|
@@ -183,7 +185,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       end
     end
 
-    context 'using add_check_constraint' do
+    context 'when using add_check_constraint' do
       let(:constraint) { "'price > 1000'" }
       let(:expected_constraint_string) { '"(price > 1000)"' }
       let(:content_of_change_method) do
@@ -202,7 +204,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
           "remove_check_constraint :prices, :test_constraint, #{constraint}"
         end
 
-        before(:each) do
+        before do
           generate_migration('20170201120000', Random.rand(1001..2000)) do
             content_of_change_method_for_removing_migration
           end
@@ -216,7 +218,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
         end
 
         it 'enforces the constraint' do
-          expect { Price.create! price: 999 }.not_to raise_error
+          create_price = -> { Price.create! price: 999 }
+          expect(create_price).not_to raise_error
 
           # Ensure that we can safely roll back the migration that removed the
           # check constraint
@@ -224,9 +227,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
           rollback
 
-          expect { Price.create! price: 999 }.to raise_error(
-            ActiveRecord::StatementInvalid, expected_error_regex
-          )
+          expect(create_price).to raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
         end
 
         context 'when remove_check_constraint is irreversible' do
