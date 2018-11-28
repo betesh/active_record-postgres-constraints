@@ -161,10 +161,11 @@ DEPENDENCIES
   active_record-postgres-constraints!
   appraisal
   byebug
+  pg (< 1.0)
   rails (= 5.1.1)
   rspec-rails
   rubocop
   simplecov
 
 BUNDLED WITH
-   1.15.1
+   1.16.2

@@ -1,8 +1,9 @@
 rvm:
   - 2.3.0
 gemfile:
-  - gemfiles/rails-5.0.gemfile
-  - gemfiles/rails-5.1.gemfile
+gemfile:
+  - gemfiles/rails_5.0.gemfile
+  - gemfiles/rails_5.1.gemfile
 before_install:
   - rvm @global do bundle install
   - (cd spec/dummy && rvm @global do bin/rake db:create RAILS_ENV=test)
