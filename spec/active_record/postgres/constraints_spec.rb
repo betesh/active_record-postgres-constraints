@@ -34,12 +34,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     end
 
     def migration_content(migration_name_suffix)
-      <<-EOM.strip_heredoc
+      <<-MIGRATION_CLASS.strip_heredoc
       class Migration#{migration_name_suffix} < ActiveRecord::Migration[5.0]
         def change\n#{yield.strip_heredoc.indent(10).rstrip}
         end
       end
-      EOM
+      MIGRATION_CLASS
     end
 
     def generate_migration(migration_number, suffix, &block)
@@ -95,12 +95,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
     shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
-        Regexp.escape <<-EOS.strip_heredoc.indent(2)
+        Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
           create_table "prices", #{"id: :serial, " if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new("5.1.0")}force: :cascade do |t|
             t.integer "price"
             t.check_constraint :test_constraint, #{expected_constraint_string}
           end
-        EOS
+        MIGRATION
       end
 
       it 'includes the check_constraint in the schema file' do
@@ -124,12 +124,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
     context 'when using `t.check_constraint`' do
       let(:content_of_change_method) do
-        <<-EOM
+        <<-MIGRATION
           create_table :prices do |t|
             t.integer :price
             t.check_constraint :test_constraint, #{constraint}
           end
-        EOM
+        MIGRATION
       end
 
       context 'when the constraint is a String' do
@@ -140,12 +140,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
         context 'when the constraint is anonymous' do
           let(:content_of_change_method) do
-            <<-EOM
+            <<-MIGRATION
               create_table :prices do |t|
                 t.integer :price
                 t.check_constraint   #{constraint}
               end
-            EOM
+            MIGRATION
           end
 
           let(:expected_constraint_error_message) do
@@ -155,12 +155,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
           it_behaves_like 'adds a constraint' do
             let(:expected_schema_regex) do
-              Regexp.new <<-EOS.strip_heredoc.indent(2)
+              Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
                 create_table "prices", force: :cascade do \|t\|
                   t.integer "price"
                   t.check_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
                 end
-              EOS
+              MIGRATION
             end
           end
         end
@@ -189,12 +189,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       let(:constraint) { "'price > 1000'" }
       let(:expected_constraint_string) { '"(price > 1000)"' }
       let(:content_of_change_method) do
-        <<-EOM
+        <<-MIGRATION
           create_table :prices do |t|
             t.integer :price
           end
           add_check_constraint :prices, :test_constraint, #{constraint}
-        EOM
+        MIGRATION
       end
 
       it_behaves_like 'adds a constraint'
