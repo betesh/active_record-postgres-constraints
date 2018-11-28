@@ -8,7 +8,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
   end
 
   context 'when a migration adds a constraint' do
-    class Price < ActiveRecord::Base; end
+    class ApplicationRecord < ActiveRecord::Base; self.abstract_class = true; end
+    class Price < ApplicationRecord; end
 
     def dummy_dir
       File.expand_path('../../../dummy', __FILE__)
@@ -96,7 +97,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
         Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
-          create_table "prices", #{"id: :serial, " if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new("5.1.0")}force: :cascade do |t|
+          create_table "prices", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
             t.integer "price"
             t.check_constraint :test_constraint, #{expected_constraint_string}
           end

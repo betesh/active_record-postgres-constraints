@@ -32,8 +32,8 @@ Gem::Specification.new do |s|
     '{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md'
   ]
 
-  s.add_dependency 'rails', '~> 5.0'
   s.add_dependency 'pg'
+  s.add_dependency 'rails', '~> 5.0'
 
   s.add_development_dependency 'osm-rubocop'
   s.add_development_dependency 'rspec-rails'
