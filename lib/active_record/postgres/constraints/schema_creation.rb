@@ -9,6 +9,7 @@ module ActiveRecord
           # rubocop:enable Style/MethodName
           result = super
           return result unless o.check_constraints
+
           nesting = 0
           # Find the closing paren of the "CREATE TABLE ( ... )" clause
           index = result.length.times do |i|

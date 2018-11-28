@@ -23,6 +23,7 @@ module ActiveRecord
           end
 
           return conditions.first if 1 == conditions.length
+
           "(#{conditions.join(') AND (')})"
         end
 

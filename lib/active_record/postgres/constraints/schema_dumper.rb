@@ -8,6 +8,7 @@ module ActiveRecord
           super
           constraints = @connection.constraints(table)
           return unless constraints.any?
+
           constraint_statements = constraints.map do |constraint|
             name = constraint['conname']
             conditions = constraint['consrc']
