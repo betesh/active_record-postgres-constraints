@@ -4,9 +4,9 @@ module ActiveRecord
   module Postgres
     module Constraints
       module SchemaCreation
-        # rubocop:disable Style/MethodName
+        # rubocop:disable Naming/MethodName
         def visit_TableDefinition(table_definition)
-          # rubocop:enable Style/MethodName
+          # rubocop:enable Naming/MethodName
           result = super
           return result unless table_definition.check_constraints
 
