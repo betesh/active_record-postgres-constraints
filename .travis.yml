@@ -8,4 +8,6 @@ gemfile:
 before_install:
   - rvm @global do bundle install
   - (cd spec/dummy && rvm @global do bin/rake db:create RAILS_ENV=test)
-script: bundle exec rspec
+script:
+  - bundle exec rubocop
+  - bundle exec rspec
