@@ -91,7 +91,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       dump_schema
     end
 
-    shared_examples_for :adds_a_constraint do
+    shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
         Regexp.escape <<-EOS.strip_heredoc.indent(2)
           create_table "prices", #{"id: :serial, " if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new("5.1.0")}force: :cascade do |t|
@@ -134,7 +134,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
         let(:constraint) { "'price > 1000'" }
         let(:expected_constraint_string) { '"(price > 1000)"' }
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
 
         context 'when the constraint is anonymous' do
           let(:content_of_change_method) do
@@ -151,7 +151,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
             'violates check constraint "prices_[0-9]{9}"'
           end
 
-          it_behaves_like :adds_a_constraint do
+          it_behaves_like 'adds a constraint' do
             let(:expected_schema_regex) do
               Regexp.new <<-EOS.strip_heredoc.indent(2)
                 create_table "prices", force: :cascade do \|t\|
@@ -170,7 +170,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
           '"(price = ANY (ARRAY[10, 20, 30]))"'
         end
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
       end
 
       context 'when the constraint is an Array' do
@@ -179,7 +179,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
           '"((price > 50) AND (price = ANY (ARRAY[90, 100])))"'
         end
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
       end
     end
 
@@ -195,7 +195,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
         EOM
       end
 
-      it_behaves_like :adds_a_constraint
+      it_behaves_like 'adds a constraint'
 
       context 'when the constraint is removed in a later migration' do
         let(:content_of_change_method_for_removing_migration) do
