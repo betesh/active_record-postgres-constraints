@@ -2,12 +2,13 @@
 
 source "https://rubygems.org"
 
-gem "byebug", :group => [:development, :test]
+gem "byebug", group: [:development, :test]
+gem "pg", "< 1.0"
 gem "rails", "5.1.1"
 
 group :test do
   gem "appraisal"
-  gem "simplecov", :require => false
+  gem "simplecov", require: false
 end
 
-gemspec :path => "../"
+gemspec path: "../"
