@@ -8,6 +8,7 @@ AllCops:
   Exclude:
     - spec/dummy/db/schema.rb
     - gemfiles/*.gemfile
+    - gemfiles/vendor/**/*
 
 # Just in case we end up supporting Rails 4.2,
 # we don't want to force a Ruby upgrade.
