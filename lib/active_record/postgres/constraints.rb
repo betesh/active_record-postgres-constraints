@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require_relative 'constraints/command_recorder'
 require_relative 'constraints/postgresql_adapter'
 require_relative 'constraints/railtie'
@@ -22,6 +23,7 @@ module ActiveRecord
           end
 
           return conditions.first if 1 == conditions.length
+
           "(#{conditions.join(') AND (')})"
         end
 

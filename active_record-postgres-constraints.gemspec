@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 $LOAD_PATH.push File.expand_path('../lib', __FILE__)
 
 # Maintain your gem's version:
@@ -31,9 +32,9 @@ Gem::Specification.new do |s|
     '{app,config,db,lib}/**/*', 'MIT-LICENSE', 'Rakefile', 'README.md'
   ]
 
-  s.add_dependency 'rails', '~> 5.0'
   s.add_dependency 'pg'
+  s.add_dependency 'rails', '~> 5.0'
 
-  s.add_development_dependency 'rubocop'
+  s.add_development_dependency 'osm-rubocop'
   s.add_development_dependency 'rspec-rails'
 end

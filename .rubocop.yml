@@ -1,3 +1,5 @@
+require: osm-rubocop
+
 AllCops:
   DisplayCopNames: true
   DisplayStyleGuide: true
@@ -5,92 +7,10 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
     - spec/dummy/db/schema.rb
+    - gemfiles/*.gemfile
+    - gemfiles/vendor/**/*
 
-Lint/EndAlignment:
-  EnforcedStyleAlignWith: variable
-
-Metrics/BlockLength:
-  Exclude:
-    - spec/**/*
-
-Rails:
-  Enabled: true
-
-Rails/SaveBang:
-  Enabled: true
-
-Style/AlignParameters:
-  EnforcedStyle: with_fixed_indentation
-
-Style/AutoResourceCleanup:
-  Enabled: true
-
-Style/BracesAroundHashParameters:
+# Just in case we end up supporting Rails 4.2,
+# we don't want to force a Ruby upgrade.
+Style/ExpandPathArguments:
   Enabled: false
-
-Style/CaseIndentation:
-  EnforcedStyle: end
-
-Style/ClassAndModuleChildren:
-  Enabled: false
-
-Style/CollectionMethods:
-  Enabled: true
-
-Style/Documentation:
-  Enabled: false
-
-Style/EmptyMethod:
-  EnforcedStyle: expanded
-
-Style/ExtraSpacing:
-  AllowForAlignment: false
-
-Style/FirstArrayElementLineBreak:
-  Enabled: true
-
-Style/FirstHashElementLineBreak:
-  Enabled: true
-
-Style/FirstMethodArgumentLineBreak:
-  Enabled: true
-
-Style/FirstMethodParameterLineBreak:
-  Enabled: true
-
-Style/FirstParameterIndentation:
-  EnforcedStyle: consistent
-
-Style/IndentArray:
-  EnforcedStyle: consistent
-
-Style/IndentHash:
-  EnforcedStyle: consistent
-
-Style/Lambda:
-  EnforcedStyle: literal
-
-Style/MultilineMethodCallIndentation:
-  EnforcedStyle: indented
-
-Style/MultilineMethodDefinitionBraceLayout:
-  EnforcedStyle: new_line
-
-Style/MultilineOperationIndentation:
-  EnforcedStyle: indented
-
-Style/OptionHash:
-  Enabled: true
-
-Style/ParallelAssignment:
-  Enabled: false
-
-Style/StringMethods:
-  Enabled: true
-
-Style/SymbolArray:
-  Enabled: true
-  EnforcedStyle: brackets
-
-Style/TrailingCommaInLiteral:
-  EnforcedStyleForMultiline: comma

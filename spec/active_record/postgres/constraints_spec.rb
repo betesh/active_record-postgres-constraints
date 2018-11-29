@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe ActiveRecord::Postgres::Constraints do
@@ -7,7 +8,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
   end
 
   context 'when a migration adds a constraint' do
-    class Price < ActiveRecord::Base; end
+    class ApplicationRecord < ActiveRecord::Base; self.abstract_class = true; end
+    class Price < ApplicationRecord; end
 
     def dummy_dir
       File.expand_path('../../../dummy', __FILE__)
@@ -33,12 +35,12 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     end
 
     def migration_content(migration_name_suffix)
-      <<-EOM.strip_heredoc
+      <<-MIGRATION_CLASS.strip_heredoc
       class Migration#{migration_name_suffix} < ActiveRecord::Migration[5.0]
         def change\n#{yield.strip_heredoc.indent(10).rstrip}
         end
       end
-      EOM
+      MIGRATION_CLASS
     end
 
     def generate_migration(migration_number, suffix, &block)
@@ -59,18 +61,26 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     end
 
     def run_migrations
-      ActiveRecord::Tasks::DatabaseTasks.migrate
+      if defined?(ActiveRecord::Base.connection.migration_context)
+        ActiveRecord::Base.connection.migration_context.migrate
+      else
+        ActiveRecord::Tasks::DatabaseTasks.migrate
+      end
       dump_schema
     end
 
     def rollback
-      ActiveRecord::Migrator.rollback(
-        ActiveRecord::Tasks::DatabaseTasks.migrations_paths, 1
-      )
+      if defined?(ActiveRecord::MigrationContext)
+        ActiveRecord::Base.connection.migration_context.rollback(1)
+      else
+        ActiveRecord::Migrator.rollback(
+          ActiveRecord::Tasks::DatabaseTasks.migrations_paths, 1
+        )
+      end
       dump_schema
     end
 
-    before(:each) do
+    before do
       cleanup_database
 
       generate_migration('20170101120000', Random.rand(1..1000)) do
@@ -80,24 +90,26 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
       run_migrations
     end
 
-    after(:each) do
+    after do
       rollback
       delete_all_migration_files
     end
 
+    # rubocop:disable RSpec/BeforeAfterAll
     after(:all) do
+      # rubocop:enable RSpec/BeforeAfterAll
       cleanup_database
       dump_schema
     end
 
-    shared_examples_for :adds_a_constraint do
+    shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
-        Regexp.escape <<-EOS.strip_heredoc.indent(2)
-          create_table "prices", #{"id: :serial, " if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new("5.1.0")}force: :cascade do |t|
+        Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
+          create_table "prices", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
             t.integer "price"
             t.check_constraint :test_constraint, #{expected_constraint_string}
           end
-        EOS
+        MIGRATION
       end
 
       it 'includes the check_constraint in the schema file' do
@@ -119,30 +131,30 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
     let(:expected_error_regex) { /\A#{expected_constraint_error_message}/ }
 
-    context 'using `t.check_constraint`' do
+    context 'when using `t.check_constraint`' do
       let(:content_of_change_method) do
-        <<-EOM
+        <<-MIGRATION
           create_table :prices do |t|
             t.integer :price
             t.check_constraint :test_constraint, #{constraint}
           end
-        EOM
+        MIGRATION
       end
 
       context 'when the constraint is a String' do
         let(:constraint) { "'price > 1000'" }
         let(:expected_constraint_string) { '"(price > 1000)"' }
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
 
         context 'when the constraint is anonymous' do
           let(:content_of_change_method) do
-            <<-EOM
+            <<-MIGRATION
               create_table :prices do |t|
                 t.integer :price
                 t.check_constraint   #{constraint}
               end
-            EOM
+            MIGRATION
           end
 
           let(:expected_constraint_error_message) do
@@ -150,14 +162,14 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
             'violates check constraint "prices_[0-9]{9}"'
           end
 
-          it_behaves_like :adds_a_constraint do
+          it_behaves_like 'adds a constraint' do
             let(:expected_schema_regex) do
-              Regexp.new <<-EOS.strip_heredoc.indent(2)
+              Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
                 create_table "prices", force: :cascade do \|t\|
                   t.integer "price"
                   t.check_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
                 end
-              EOS
+              MIGRATION
             end
           end
         end
@@ -169,7 +181,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
           '"(price = ANY (ARRAY[10, 20, 30]))"'
         end
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
       end
 
       context 'when the constraint is an Array' do
@@ -178,30 +190,30 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
           '"((price > 50) AND (price = ANY (ARRAY[90, 100])))"'
         end
 
-        it_behaves_like :adds_a_constraint
+        it_behaves_like 'adds a constraint'
       end
     end
 
-    context 'using add_check_constraint' do
+    context 'when using add_check_constraint' do
       let(:constraint) { "'price > 1000'" }
       let(:expected_constraint_string) { '"(price > 1000)"' }
       let(:content_of_change_method) do
-        <<-EOM
+        <<-MIGRATION
           create_table :prices do |t|
             t.integer :price
           end
           add_check_constraint :prices, :test_constraint, #{constraint}
-        EOM
+        MIGRATION
       end
 
-      it_behaves_like :adds_a_constraint
+      it_behaves_like 'adds a constraint'
 
       context 'when the constraint is removed in a later migration' do
         let(:content_of_change_method_for_removing_migration) do
           "remove_check_constraint :prices, :test_constraint, #{constraint}"
         end
 
-        before(:each) do
+        before do
           generate_migration('20170201120000', Random.rand(1001..2000)) do
             content_of_change_method_for_removing_migration
           end
@@ -215,7 +227,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
         end
 
         it 'enforces the constraint' do
-          expect { Price.create! price: 999 }.not_to raise_error
+          create_price = -> { Price.create! price: 999 }
+          expect(create_price).not_to raise_error
 
           # Ensure that we can safely roll back the migration that removed the
           # check constraint
@@ -223,9 +236,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
           rollback
 
-          expect { Price.create! price: 999 }.to raise_error(
-            ActiveRecord::StatementInvalid, expected_error_regex
-          )
+          expect(create_price).to raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
         end
 
         context 'when remove_check_constraint is irreversible' do

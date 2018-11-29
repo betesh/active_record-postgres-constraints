@@ -1,13 +1,15 @@
 # frozen_string_literal: true
+
 module ActiveRecord
   module Postgres
     module Constraints
       module SchemaCreation
-        # rubocop:disable Style/MethodName
-        def visit_TableDefinition(o)
-          # rubocop:enable Style/MethodName
+        # rubocop:disable Naming/MethodName
+        def visit_TableDefinition(table_definition)
+          # rubocop:enable Naming/MethodName
           result = super
-          return result unless o.check_constraints
+          return result unless table_definition.check_constraints
+
           nesting = 0
           # Find the closing paren of the "CREATE TABLE ( ... )" clause
           index = result.length.times do |i|
@@ -15,7 +17,7 @@ module ActiveRecord
             nesting, should_break = adjust_nesting(nesting, token)
             break i if should_break
           end
-          result[index] = ", #{o.check_constraints.join(', ')})"
+          result[index] = ", #{table_definition.check_constraints.join(', ')})"
           result
         end
 
