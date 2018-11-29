@@ -7,11 +7,13 @@ module ActiveRecord
         def indexes_in_create(table, stream)
           constraints = @connection.constraints(table)
           indexes = @connection.indexes(table).reject do |index|
-            constraints.pluck('conname').include?(index['name'])
+            constraints.pluck('conname').include?(index_name(index))
           end
           dump_indexes(indexes, stream)
           dump_constraints(constraints, stream)
         end
+
+        private
 
         def dump_indexes(indexes, stream)
           return unless indexes.any?
@@ -32,6 +34,14 @@ module ActiveRecord
               to_method(constraint)
           end
           stream.puts constraint_statements.sort.join("\n")
+        end
+
+        def index_name(index)
+          if index.is_a?(ActiveRecord::ConnectionAdapters::IndexDefinition)
+            index.name
+          else
+            index['name']
+          end
         end
       end
     end

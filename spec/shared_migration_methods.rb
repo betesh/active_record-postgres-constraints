@@ -57,6 +57,7 @@ module SharedMigrationMethods
       ActiveRecord::Tasks::DatabaseTasks.migrate
     end
     dump_schema
+    Price.reset_column_information
   end
 
   def rollback

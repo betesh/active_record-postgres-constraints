@@ -11,6 +11,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
     class Price < ApplicationRecord; end
 
     before do
+      ActiveRecord::Migrator.migrations_paths = ActiveRecord::Tasks::DatabaseTasks.migrations_paths
+
       cleanup_database
 
       generate_migration('20170101120000', Random.rand(1..1000)) do
