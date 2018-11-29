@@ -26,7 +26,16 @@ module ActiveRecord
         end
 
         def pg?
-          connection = ActiveRecord::Base.connection
+          begin
+            connection = ActiveRecord::Base.connection
+          rescue ActiveRecord::NoDatabaseError
+            Rails.logger.warn do
+              'Not applying Postgres Constraints patches to ActiveRecord ' \
+                'since the database does not exist'
+            end
+            return false
+          end
+
           pg = connection.class.to_s == "#{AR_CAS}::PostgreSQLAdapter"
           return true if pg
 
