@@ -8,7 +8,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
     include SharedMigrationMethods
 
     class ApplicationRecord < ActiveRecord::Base; self.abstract_class = true; end
-    class Price < ApplicationRecord; end
+    class Phase < ApplicationRecord; end
 
     before do
       ActiveRecord::Migrator.migrations_paths = ActiveRecord::Tasks::DatabaseTasks.migrations_paths
@@ -37,8 +37,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
     shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
         Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
-          create_table "prices", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
-            t.integer #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"price"
+          create_table "phases", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
+            t.integer #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"project_id"
             t.datetime "from"
             t.datetime "to"
             t.exclude_constraint :test_constraint, #{expected_constraint_string}
@@ -52,18 +52,20 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
       end
 
       it 'enforces the constraint' do # rubocop:disable RSpec/ExampleLength
-        create_price = ->(from, to, price = 999) { Price.create! price: price, from: from, to: to }
+        create_phase = ->(from, to, project_id = 999) {
+          Phase.create! project_id: project_id, from: from, to: to
+        }
 
-        create_price.call(1.day.ago, 1.day.from_now)
-        expect { create_price.call(Time.current, 2.days.from_now) }.to(
+        create_phase.call(1.day.ago, 1.day.from_now)
+        expect { create_phase.call(Time.current, 2.days.from_now) }.to(
           raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
         )
-        create_price.call(2.days.from_now, nil)
-        create_price.call(Time.current, 2.days.from_now, 1)
+        create_phase.call(2.days.from_now, nil)
+        create_phase.call(Time.current, 2.days.from_now, 1)
         if where_clause
-          create_price.call(Time.current, 2.days.from_now, 1)
+          create_phase.call(Time.current, 2.days.from_now, 1)
         else
-          expect { create_price.call(Time.current, 2.days.from_now, 1) }.to(
+          expect { create_phase.call(Time.current, 2.days.from_now, 1) }.to(
             raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
           )
         end
@@ -83,8 +85,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
       let(:content_of_change_method) do
         <<-MIGRATION
           enable_extension "btree_gist"
-          create_table :prices do |t|
-            t.integer  :price
+          create_table :phases do |t|
+            t.integer  :project_id
             t.datetime :from
             t.datetime :to
             t.exclude_constraint :test_constraint, #{constraint}
@@ -95,11 +97,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
       context 'when the constraint is a String' do
         let(:constraint) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-          ':price => :equals'
+          ':project_id => :equals'
         end
         let(:expected_constraint_string) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-          'price: :equals'
+          'project_id: :equals'
         end
 
         it_behaves_like 'adds a constraint'
@@ -108,11 +110,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
           let(:where_clause) { true }
           let(:constraint) do
             'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-            ':price => :equals, where: \'price <> 1\''
+            ':project_id => :equals, where: \'project_id <> 1\''
           end
           let(:expected_constraint_string) do
             'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-            'price: :equals, where: \'(price <> 1)\''
+            'project_id: :equals, where: \'(project_id <> 1)\''
           end
 
           it_behaves_like 'adds a constraint'
@@ -122,8 +124,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
           let(:content_of_change_method) do
             <<-MIGRATION
               enable_extension "btree_gist"
-              create_table :prices do |t|
-                t.integer  :price
+              create_table :phases do |t|
+                t.integer  :project_id
                 t.datetime :from
                 t.datetime :to
                 t.exclude_constraint   #{constraint}
@@ -133,17 +135,17 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
 
           let(:expected_constraint_error_message) do
             'PG::ExclusionViolation: ERROR:  conflicting key value violates '\
-            'exclusion constraint "prices_[0-9]{9}"'
+            'exclusion constraint "phases_[0-9]{7,9}"'
           end
 
           it_behaves_like 'adds a constraint' do
             let(:expected_schema_regex) do
               Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
-                create_table "prices", force: :cascade do \|t\|
-                  t.integer  #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"price"
+                create_table "phases", force: :cascade do \|t\|
+                  t.integer  #{' ' if Gem::Version.new(ActiveRecord.gem_version) < Gem::Version.new('5.1.0')}"project_id"
                   t.datetime "from"
                   t.datetime "to"
-                  t.exclude_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
+                  t.exclude_constraint :phases_[0-9]{7,9}, #{expected_constraint_string}
                 end
               MIGRATION
             end
@@ -153,11 +155,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
 
       context 'when the constraint is a Hash' do
         let(:constraint) do
-          { using: :gist, 'tsrange("from", "to")' => :overlaps, price: :equals }
+          { using: :gist, 'tsrange("from", "to")' => :overlaps, project_id: :equals }
         end
         let(:expected_constraint_string) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-          'price: :equals'
+          'project_id: :equals'
         end
 
         it_behaves_like 'adds a constraint'
@@ -168,13 +170,13 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
             {
               using: :gist,
               'tsrange("from", "to")' => :overlaps,
-              price: :equals,
-              where: 'price <> 1',
+              project_id: :equals,
+              where: 'project_id <> 1',
             }
           end
           let(:expected_constraint_string) do
             'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-            'price: :equals, where: \'(price <> 1)\''
+            'project_id: :equals, where: \'(project_id <> 1)\''
           end
 
           it_behaves_like 'adds a constraint'
@@ -184,21 +186,21 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
 
     context 'when using add_exclude_constraint' do
       let(:constraint) do
-        { using: :gist, 'tsrange("from", "to")' => :overlaps, price: :equals }
+        { using: :gist, 'tsrange("from", "to")' => :overlaps, project_id: :equals }
       end
       let(:expected_constraint_string) do
         'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-        'price: :equals'
+        'project_id: :equals'
       end
       let(:content_of_change_method) do
         <<-MIGRATION
           enable_extension "btree_gist"
-          create_table :prices do |t|
-            t.integer  :price
+          create_table :phases do |t|
+            t.integer  :project_id
             t.datetime :from
             t.datetime :to
           end
-          add_exclude_constraint :prices, :test_constraint, #{constraint}
+          add_exclude_constraint :phases, :test_constraint, #{constraint}
         MIGRATION
       end
 
@@ -208,11 +210,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
         let(:where_clause) { true }
         let(:constraint) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-            ':price => :equals, where: \'price <> 1\''
+            ':project_id => :equals, where: \'project_id <> 1\''
         end
         let(:expected_constraint_string) do
           'using: :gist, \'tsrange("from", "to")\' => :overlaps, '\
-            'price: :equals, where: \'(price <> 1)\''
+            'project_id: :equals, where: \'(project_id <> 1)\''
         end
 
         it_behaves_like 'adds a constraint'
@@ -220,7 +222,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
 
       context 'when the constraint is removed in a later migration' do
         let(:content_of_change_method_for_removing_migration) do
-          "remove_exclude_constraint :prices, :test_constraint, #{constraint}"
+          "remove_exclude_constraint :phases, :test_constraint, #{constraint}"
         end
 
         before do
@@ -237,32 +239,32 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
         end
 
         it 'enforces the constraint' do # rubocop:disable RSpec/ExampleLength
-          create_price = ->(from, to) { Price.create! price: 999, from: from, to: to }
+          create_phase = ->(from, to) { Phase.create! project_id: 999, from: from, to: to }
 
-          create_price.call(Time.current, 2.days.from_now)
-          expect { create_price.call(1.day.ago, 1.day.from_now) }.not_to(raise_error)
+          create_phase.call(Time.current, 2.days.from_now)
+          expect { create_phase.call(1.day.ago, 1.day.from_now) }.not_to(raise_error)
 
           # Ensure that we can safely roll back the migration that removed the
           # exclude constraint
-          Price.destroy_all
+          Phase.destroy_all
 
           rollback
 
-          create_price.call(Time.current, 2.days.from_now)
-          expect { create_price.call(1.day.ago, 1.day.from_now) }.to(
+          create_phase.call(Time.current, 2.days.from_now)
+          expect { create_phase.call(1.day.ago, 1.day.from_now) }.to(
             raise_error(ActiveRecord::StatementInvalid, expected_error_regex)
           )
         end
 
         context 'when remove_exclude_constraint is irreversible' do
           let(:content_of_change_method_for_removing_migration) do
-            'remove_exclude_constraint :prices, :test_constraint'
+            'remove_exclude_constraint :phases, :test_constraint'
           end
 
           let(:expected_irreversible_migration_error_message) do
             'To make this migration reversible, pass the constraint to '\
               'remove_exclude_constraint, i.e. `remove_exclude_constraint, '\
-              ":prices, :test_constraint, 'price > 999'`"
+              ":phases, :test_constraint, 'price > 999'`"
           end
 
           it 'removes the exclude_constraint from the schema file' do
@@ -271,14 +273,14 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude do
           end
 
           it 'enforces the constraint' do
-            Price.create! price: 999, from: 1.day.ago, to: 2.days.from_now
-            expect { Price.create! price: 999, from: 2.days.ago, to: 1.day.from_now }.not_to(
+            Phase.create! project_id: 999, from: 1.day.ago, to: 2.days.from_now
+            expect { Phase.create! project_id: 999, from: 2.days.ago, to: 1.day.from_now }.not_to(
               raise_error
             )
 
             # Ensure that we can safely roll back the migration that removed the
             # exclude constraint
-            Price.destroy_all
+            Phase.destroy_all
           end
 
           def rollback
