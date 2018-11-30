@@ -159,7 +159,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
 
           let(:expected_constraint_error_message) do
             'PG::CheckViolation: ERROR:  new row for relation "prices" '\
-            'violates check constraint "prices_[0-9]{9}"'
+            'violates check constraint "prices_[0-9]{7,9}"'
           end
 
           it_behaves_like 'adds a constraint' do
@@ -167,7 +167,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
               Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
                 create_table "prices", force: :cascade do \|t\|
                   t.integer "price"
-                  t.check_constraint :prices_[0-9]{7-9}, #{expected_constraint_string}
+                  t.check_constraint :prices_[0-9]{7,9}, #{expected_constraint_string}
                 end
               MIGRATION
             end
