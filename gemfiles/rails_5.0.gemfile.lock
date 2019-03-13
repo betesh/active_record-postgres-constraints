@@ -3,7 +3,7 @@ PATH
   specs:
     active_record-postgres-constraints (0.1.4)
       pg
-      rails (~> 5.0)
+      rails (>= 5.0, <= 7.0)
 
 GEM
   remote: https://rubygems.org/

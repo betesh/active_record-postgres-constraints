@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   ]
 
   s.add_dependency 'pg'
-  s.add_dependency 'rails', '~> 5.0'
+  s.add_dependency 'rails', '>= 5.0', '<= 7.0'
 
   s.add_development_dependency 'osm-rubocop'
   s.add_development_dependency 'rspec', '~> 3.8'
