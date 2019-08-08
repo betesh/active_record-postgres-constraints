@@ -8,9 +8,6 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
   end
 
   context 'when a migration adds a constraint' do
-    class ApplicationRecord < ActiveRecord::Base; self.abstract_class = true; end
-    class Price < ApplicationRecord; end
-
     def dummy_dir
       File.expand_path('../../../dummy', __FILE__)
     end
@@ -81,6 +78,8 @@ RSpec.describe ActiveRecord::Postgres::Constraints do
     end
 
     before do
+      stub_const('Price', Class.new(ApplicationRecord))
+
       cleanup_database
 
       generate_migration('20170101120000', Random.rand(1..1000)) do
