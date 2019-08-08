@@ -2,8 +2,8 @@
 
 require 'rails_helper'
 
-RSpec.describe ActiveRecord::Postgres::Constraints do
-  context 'when a migration adds a constraint' do
+RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
+  context 'when a migration adds a check constraint' do
     include SharedMigrationMethods
 
     before do

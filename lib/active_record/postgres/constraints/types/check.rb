@@ -3,6 +3,8 @@
 module ActiveRecord
   module Postgres
     module Constraints
+      module Types
+        module Check
           class << self
             def to_sql(table, name_or_conditions, conditions = nil)
               if conditions
@@ -14,6 +16,8 @@ module ActiveRecord
 
               "CONSTRAINT #{name} CHECK (#{normalize_conditions(conditions)})"
             end
+
+            private
 
             def normalize_conditions(conditions)
               conditions = [conditions] unless conditions.is_a?(Array)
@@ -38,6 +42,8 @@ module ActiveRecord
               "(#{hash.join(') AND (')})"
             end
           end
+        end
+      end
     end
   end
 end

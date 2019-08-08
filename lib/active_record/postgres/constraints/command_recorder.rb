@@ -4,8 +4,7 @@ module ActiveRecord
   module Postgres
     module Constraints
       module CommandRecorder
-        type = :check
-
+        CONSTRAINT_TYPES.keys.each do |type|
           define_method("add_#{type}_constraint") do |*args, &block|
             record(:"add_#{type}_constraint", args, &block)
           end
@@ -27,6 +26,7 @@ module ActiveRecord
           define_method("invert_remove_#{type}_constraint") do |args, &block|
             [:"add_#{type}_constraint", args, block]
           end
+        end
       end
     end
   end

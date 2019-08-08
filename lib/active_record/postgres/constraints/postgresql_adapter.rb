@@ -5,7 +5,10 @@ module ActiveRecord
     module Constraints
       module PostgreSQLAdapter
         def add_check_constraint(table, name_or_conditions, conditions = nil)
-          constraint = Constraints.to_sql(table, name_or_conditions, conditions)
+          constraint =
+            ActiveRecord::Postgres::Constraints.
+              class_for_constraint_type(:check).
+              to_sql(table, name_or_conditions, conditions)
           execute("ALTER TABLE #{table} ADD #{constraint}")
         end
 

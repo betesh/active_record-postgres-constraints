@@ -8,7 +8,10 @@ module ActiveRecord
 
         def check_constraint(name_or_conditions, conditions = nil)
           @constraints ||= []
-          constraint = Constraints.to_sql(name, name_or_conditions, conditions)
+          constraint =
+            ActiveRecord::Postgres::Constraints.
+              class_for_constraint_type(:check).
+              to_sql(name, name_or_conditions, conditions)
           constraints << constraint
         end
       end
