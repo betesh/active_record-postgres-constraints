@@ -8,7 +8,7 @@ module ActiveRecord
         def visit_TableDefinition(table_definition)
           # rubocop:enable Naming/MethodName
           result = super
-          return result unless table_definition.check_constraints
+          return result unless table_definition.constraints
 
           nesting = 0
           # Find the closing paren of the "CREATE TABLE ( ... )" clause
@@ -17,7 +17,7 @@ module ActiveRecord
             nesting, should_break = adjust_nesting(nesting, token)
             break i if should_break
           end
-          result[index] = ", #{table_definition.check_constraints.join(', ')})"
+          result[index] = ", #{table_definition.constraints.join(', ')})"
           result
         end
 

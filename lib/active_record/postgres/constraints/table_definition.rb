@@ -4,12 +4,12 @@ module ActiveRecord
   module Postgres
     module Constraints
       module TableDefinition
-        attr_reader :check_constraints
+        attr_reader :constraints
 
         def check_constraint(name_or_conditions, conditions = nil)
-          @check_constraints ||= []
+          @constraints ||= []
           constraint = Constraints.to_sql(name, name_or_conditions, conditions)
-          check_constraints << constraint
+          constraints << constraint
         end
       end
     end
