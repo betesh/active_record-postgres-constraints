@@ -4,6 +4,7 @@ rvm:
   - 2.3.0
   - 2.4.0
   - 2.5.0
+  - 2.6.0
 gemfile:
   - gemfiles/rails_5.0.gemfile
   - gemfiles/rails_5.1.gemfile
@@ -16,8 +17,9 @@ matrix:
   - rvm: 2.4.0
     gemfile: gemfiles/rails_6.0.gemfile
 before_install:
+  - rvm @global do gem install --force bundler -v 1.17.3
   - rvm @global do bundle install
   - (cd spec/dummy && rvm @global do bin/rake db:create RAILS_ENV=test)
 script:
-  - bundle exec rubocop
-  - bundle exec rspec
+  - rvm @global do bundle exec rubocop
+  - rvm @global do bundle exec rspec

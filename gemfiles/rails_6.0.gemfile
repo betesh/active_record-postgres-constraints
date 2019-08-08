@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "byebug", group: [:development, :test]
 gem "pg", "< 1.0"
-gem "rails", "~> 6.0.0.beta"
+gem "rails", "~> 6.0.0.rc2"
 
 group :test do
   gem "appraisal"
