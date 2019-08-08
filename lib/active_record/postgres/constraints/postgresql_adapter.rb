@@ -4,15 +4,25 @@ module ActiveRecord
   module Postgres
     module Constraints
       module PostgreSQLAdapter
-        def add_check_constraint(table, name_or_conditions, conditions = nil)
+        CONSTRAINT_TYPES.keys.each do |type|
+          define_method "add_#{type}_constraint" do |table, name_or_conditions, conditions = nil|
+            add_constraint(type, table, name_or_conditions, conditions)
+          end
+
+          define_method "remove_#{type}_constraint" do |table, name, conditions = nil|
+            remove_constraint(type, table, name, conditions)
+          end
+        end
+
+        def add_constraint(type, table, name_or_conditions, conditions)
           constraint =
             ActiveRecord::Postgres::Constraints.
-              class_for_constraint_type(:check).
+              class_for_constraint_type(type).
               to_sql(table, name_or_conditions, conditions)
           execute("ALTER TABLE #{table} ADD #{constraint}")
         end
 
-        def remove_check_constraint(table, name, _conditions = nil)
+        def remove_constraint(_type, table, name, _conditions)
           execute("ALTER TABLE #{table} DROP CONSTRAINT #{name}")
         end
 
