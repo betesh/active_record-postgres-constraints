@@ -14,7 +14,8 @@ module ActiveRecord
         end
 
         def constraints(table)
-          sql = "SELECT conname, consrc FROM pg_constraint
+          sql = "SELECT conname, consrc
+            FROM pg_constraint
             JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
             WHERE
               pg_constraint.contype = 'c'
