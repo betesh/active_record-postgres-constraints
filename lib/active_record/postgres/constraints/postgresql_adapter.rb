@@ -27,11 +27,12 @@ module ActiveRecord
         end
 
         def constraints(table)
-          sql = "SELECT conname, consrc
+          types = CONSTRAINT_TYPES.values.map { |v| "'#{v}'" }.join(', ')
+          sql = "SELECT conname, consrc, contype
             FROM pg_constraint
             JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
             WHERE
-              pg_constraint.contype = 'c'
+              pg_constraint.contype IN (#{types})
               AND
               pg_class.relname = '#{table}'".tr("\n", ' ').squeeze(' ')
           execute sql

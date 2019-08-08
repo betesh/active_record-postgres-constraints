@@ -17,6 +17,12 @@ module ActiveRecord
               "CONSTRAINT #{name} CHECK (#{normalize_conditions(conditions)})"
             end
 
+            def to_schema_dump(constraint)
+              name = constraint['conname']
+              conditions = constraint['consrc']
+              "    t.check_constraint :#{name}, #{conditions.inspect}"
+            end
+
             private
 
             def normalize_conditions(conditions)
