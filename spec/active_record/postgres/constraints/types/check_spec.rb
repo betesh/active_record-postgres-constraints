@@ -2,48 +2,19 @@
 
 require 'rails_helper'
 
-RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
+RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
   context 'when a migration adds a check constraint' do
-    include SharedMigrationMethods
-
-    before do
-      stub_const('Price', Class.new(ApplicationRecord))
-
-      cleanup_database
-
-      generate_migration('20170101120000', Random.rand(1..1000)) do
-        content_of_change_method
-      end
-
-      run_migrations
-    end
-
-    after do
-      rollback
-      delete_all_migration_files
-    end
-
-    # rubocop:disable RSpec/BeforeAfterAll
-    after(:all) do
-      # rubocop:enable RSpec/BeforeAfterAll
-      cleanup_database
-      dump_schema
-    end
-
     shared_examples_for 'adds a constraint' do
       let(:expected_schema_regex) do
         Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
-          create_table "prices", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
+          #{create_table_line_of_schema_file(:prices)}
             t.integer "price"
             t.check_constraint :test_constraint, #{expected_constraint_string}
           end
         MIGRATION
       end
 
-      it 'includes the check_constraint in the schema file' do
-        schema = File.read(schema_file)
-        expect(schema).to match expected_schema_regex
-      end
+      it { should include_the_constraint_in_the_schema_file }
 
       it 'enforces the constraint' do
         expect { Price.create! price: 999 }.to raise_error(
@@ -51,7 +22,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
         )
       end
     end
-
+    let(:model_class) { 'Price' }
     let(:expected_constraint_error_message) do
       'PG::CheckViolation: ERROR:  new row for relation "prices" violates '\
         'check constraint "test_constraint"'
