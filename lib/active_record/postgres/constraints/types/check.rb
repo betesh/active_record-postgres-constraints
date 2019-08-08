@@ -4,6 +4,17 @@ module ActiveRecord
   module Postgres
     module Constraints
       class << self
+        def to_sql(table, name_or_conditions, conditions = nil)
+          if conditions
+            name = name_or_conditions
+          else
+            name = "#{table}_#{Time.zone.now.nsec}"
+            conditions = name_or_conditions
+          end
+
+          "CONSTRAINT #{name} CHECK (#{normalize_conditions(conditions)})"
+        end
+
         def normalize_conditions(conditions)
           conditions = [conditions] unless conditions.is_a?(Array)
           conditions = conditions.map do |condition|
@@ -25,17 +36,6 @@ module ActiveRecord
             array << "#{column} IN ('#{predicate}')"
           end
           "(#{hash.join(') AND (')})"
-        end
-
-        def to_sql(table, name_or_conditions, conditions = nil)
-          if conditions
-            name = name_or_conditions
-          else
-            name = "#{table}_#{Time.zone.now.nsec}"
-            conditions = name_or_conditions
-          end
-
-          "CONSTRAINT #{name} CHECK (#{normalize_conditions(conditions)})"
         end
       end
     end
