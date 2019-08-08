@@ -7,13 +7,8 @@ module ActiveRecord
         module Check
           class << self
             def to_sql(table, name_or_conditions, conditions = nil)
-              if conditions
-                name = name_or_conditions
-              else
-                name = "#{table}_#{Time.zone.now.nsec}"
-                conditions = name_or_conditions
-              end
-
+              name, conditions = ActiveRecord::Postgres::Constraints.
+                normalize_name_and_conditions(table, name_or_conditions, conditions)
               "CONSTRAINT #{name} CHECK (#{normalize_conditions(conditions)})"
             end
 

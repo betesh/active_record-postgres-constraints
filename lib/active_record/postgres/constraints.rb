@@ -11,6 +11,12 @@ module ActiveRecord
         'ActiveRecord::Postgres::Constraints::Types::'\
         "#{type.to_s.classify}".constantize
       end
+
+      def self.normalize_name_and_conditions(table, name_or_conditions, conditions)
+        return [name_or_conditions, conditions] if conditions
+
+        ["#{table}_#{Time.zone.now.nsec}", name_or_conditions]
+      end
     end
   end
 end
