@@ -5,11 +5,11 @@ require 'rails_helper'
 RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
   context 'when a migration adds a check constraint' do
     shared_examples_for 'adds a constraint' do
-      let(:expected_schema_regex) do
-        Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
+      let(:expected_schema) do
+        <<-MIGRATION
           #{create_table_line_of_schema_file(:prices)}
-            t.integer "price"
-            t.check_constraint :test_constraint, #{expected_constraint_string}
+            t\.integer "price"
+            t\.check_constraint :test_constraint, #{expected_constraint_string}
           end
         MIGRATION
       end
@@ -42,7 +42,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
 
       context 'when the constraint is a String' do
         let(:constraint) { "'price > 1000'" }
-        let(:expected_constraint_string) { '"(price > 1000)"' }
+        let(:expected_constraint_string) { '"\(price > 1000\)"' }
 
         it_behaves_like 'adds a constraint'
 
@@ -62,11 +62,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
           end
 
           it_behaves_like 'adds a constraint' do
-            let(:expected_schema_regex) do
-              Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
-                create_table "prices", force: :cascade do \|t\|
-                  t.integer "price"
-                  t.check_constraint :prices_[0-9]{7,9}, #{expected_constraint_string}
+            let(:expected_schema) do
+              <<-MIGRATION
+                #{create_table_line_of_schema_file(:prices)}
+                  t\.integer "price"
+                  t\.check_constraint :prices_[0-9]{7,9}, #{expected_constraint_string}
                 end
               MIGRATION
             end
@@ -77,7 +77,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
       context 'when the constraint is a Hash' do
         let(:constraint) { { price: [10, 20, 30] } }
         let(:expected_constraint_string) do
-          '"(price = ANY (ARRAY[10, 20, 30]))"'
+          '"\(price = ANY \(ARRAY\[10, 20, 30\]\)\)"'
         end
 
         it_behaves_like 'adds a constraint'
@@ -86,7 +86,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
       context 'when the constraint is an Array' do
         let(:constraint) { ['price > 50', { price: [90, 100] }] }
         let(:expected_constraint_string) do
-          '"((price > 50) AND (price = ANY (ARRAY[90, 100])))"'
+          '"\(\(price > 50\) AND \(price = ANY \(ARRAY\[90, 100\]\)\)\)"'
         end
 
         it_behaves_like 'adds a constraint'
@@ -95,7 +95,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
 
     context 'when using add_check_constraint' do
       let(:constraint) { "'price > 1000'" }
-      let(:expected_constraint_string) { '"(price > 1000)"' }
+      let(:expected_constraint_string) { '"\(price > 1000\)"' }
       let(:content_of_change_method) do
         <<-MIGRATION
           create_table :prices do |t|
