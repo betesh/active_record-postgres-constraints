@@ -145,7 +145,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
 
           let(:expected_irreversible_migration_error_message) do
             'To make this migration reversible, pass the constraint to '\
-              'remove_check_constraint, i.e. `remove_check_constraint, '\
+              'remove_check_constraint, i\.e\. `remove_check_constraint '\
               ":prices, :test_constraint, 'price > 999'`"
           end
 

@@ -15,10 +15,14 @@ module ActiveRecord
 
           define_method("remove_#{type}_constraint") do |*args, &block|
             if args.length < 3
+              example_constraint = ActiveRecord::Postgres::Constraints.
+                class_for_constraint_type(type).
+                example_constraint
+
               raise ActiveRecord::IrreversibleMigration,
                 'To make this migration reversible, pass the constraint to '\
-                "remove_#{type}_constraint, i.e. `remove_#{type}_constraint, "\
-                "#{args[0].inspect}, #{args[1].inspect}, 'price > 999'`"
+                "remove_#{type}_constraint, i.e. `remove_#{type}_constraint "\
+                "#{args[0].inspect}, #{args[1].inspect}, #{example_constraint}`"
             end
             record(:"remove_#{type}_constraint", args, &block)
           end
