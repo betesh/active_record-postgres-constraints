@@ -39,7 +39,7 @@ module ActiveRecord
               exclusions = definition_to_exclusions(definition).join(', ')
               conditions = "#{using}#{exclusions}#{", #{where}" if where}"
 
-              "    t.exclude_constraint :#{name}, #{conditions}"
+              "  t.exclude_constraint :#{name}, #{conditions}"
             end
 
             def example_constraint
