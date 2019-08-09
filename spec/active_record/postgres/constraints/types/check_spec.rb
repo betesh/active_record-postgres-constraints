@@ -125,7 +125,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
           expect(schema).not_to match(/check_constraint/)
         end
 
-        it 'enforces the constraint' do
+        it 'does not enforce the constraint until we rollback the second migration' do
           create_price = -> { Price.create! price: 999 }
           expect(create_price).not_to raise_error
 
@@ -154,7 +154,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
             expect(schema).not_to match(/check_constraint/)
           end
 
-          it 'enforces the constraint' do
+          it 'does not enforce the constraint' do
             expect { Price.create! price: 999 }.not_to raise_error
 
             # Ensure that we can safely roll back the migration that removed the
