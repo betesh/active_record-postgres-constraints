@@ -14,3 +14,6 @@ AllCops:
 # we don't want to force a Ruby upgrade.
 Style/ExpandPathArguments:
   Enabled: false
+
+Style/ImplicitRuntimeError:
+  Enabled: false

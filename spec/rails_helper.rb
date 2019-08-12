@@ -2,6 +2,24 @@
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 ENV['RAILS_ENV'] ||= 'test'
+
+# Suppress the patch at
+# https://github.com/rails/rails/blob/v5.1.7/activerecord/lib/active_record/connection_adapters/postgresql_adapter.rb#L7
+# to ensure that all pg statements run synchronously during tests
+require 'pg'
+class ::PG::Connection
+  # We don't want sync activities leaking from one test to another
+  if PG::Connection.respond_to?('async_api=')
+    PG::Connection.async_api = false
+  else
+    def async_exec_params
+      raise 'This should never happen'
+    end
+
+    alias async_exec exec_params
+  end
+end
+
 require File.expand_path('../dummy/config/environment', __FILE__)
 # Prevent database truncation if the environment is production
 abort('The Rails environment is running in production mode!') if Rails.env.production?
