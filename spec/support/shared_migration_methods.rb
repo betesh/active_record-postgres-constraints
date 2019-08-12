@@ -27,6 +27,7 @@ module SharedMigrationMethods
   def migration_content(migration_name_suffix)
     <<-MIGRATION_CLASS.strip_heredoc
     class Migration#{migration_name_suffix} < ActiveRecord::Migration[5.0]
+      self.verbose = false
       def change\n#{yield.strip_heredoc.indent(10).rstrip}
       end
     end
