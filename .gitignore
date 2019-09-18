@@ -9,3 +9,4 @@ spec/examples.txt
 coverage
 .rake_tasks~
 Gemfile.lock
+vendor
