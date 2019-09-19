@@ -15,6 +15,7 @@ gemspec
 # To use a debugger
 gem 'byebug', group: [:development, :test]
 
+gem 'parallel_tests'
 gem 'pg', '< 1.0' # Higher versions are not compatible with Rails 5.1
 
 group :test do

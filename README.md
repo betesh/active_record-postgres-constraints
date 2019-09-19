@@ -14,7 +14,7 @@ using features like this, then you should set the schema format to :sql.
 No longer is this the case.  You can now use the default schema format
 (:ruby) and still preserve your check constraints.
 
-At this time, this only supports check constraints for the postgresql ActiveRecord database adapter.
+At this time, this only supports check and exclude constraints for the postgresql ActiveRecord database adapter.
 
 ## Usage
 
@@ -42,6 +42,34 @@ remove_check_constraint :people
 
 # If you need it to be reversible (Recommended):
 remove_check_constraint :people, title: ['Mr.', 'Mrs.', 'Dr.']
+```
+
+#### Add an exclude constraint
+Add exclude constraints to a table in a migration:
+
+```ruby
+create_table :booking do |t|
+  t.integer :room_id
+  t.datetime :from
+  t.datetime :to
+  t.exclude_constraint using: :gist, 'tsrange("from", "to")' => :overlaps, room_id: :equals
+end
+```
+
+OR
+
+```ruby
+add_exclude_constraint :booking, using: :gist, 'tsrange("from", "to")' => :overlaps, room_id: :equals
+```
+
+#### Remove an exclude constraint
+
+```ruby
+# If you don't need it to be reversible:
+remove_exclude_constraint :booking
+
+# If you need it to be reversible (Recommended):
+remove_exclude_constraint :booking, using: :gist, 'tsrange("from", "to")' => :overlaps, room_id: :equals
 ```
 
 ## Installation

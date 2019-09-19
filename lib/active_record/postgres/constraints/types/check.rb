@@ -18,6 +18,10 @@ module ActiveRecord
               "    t.check_constraint :#{name}, #{conditions.inspect}"
             end
 
+            def example_constraint
+              "'price > 999'"
+            end
+
             private
 
             def normalize_conditions(conditions)

@@ -2,48 +2,19 @@
 
 require 'rails_helper'
 
-RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
+RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check, :constraint do
   context 'when a migration adds a check constraint' do
-    include SharedMigrationMethods
-
-    before do
-      stub_const('Price', Class.new(ApplicationRecord))
-
-      cleanup_database
-
-      generate_migration('20170101120000', Random.rand(1..1000)) do
-        content_of_change_method
-      end
-
-      run_migrations
-    end
-
-    after do
-      rollback
-      delete_all_migration_files
-    end
-
-    # rubocop:disable RSpec/BeforeAfterAll
-    after(:all) do
-      # rubocop:enable RSpec/BeforeAfterAll
-      cleanup_database
-      dump_schema
-    end
-
     shared_examples_for 'adds a constraint' do
-      let(:expected_schema_regex) do
-        Regexp.escape <<-MIGRATION.strip_heredoc.indent(2)
-          create_table "prices", #{'id: :serial, ' if Gem::Version.new(ActiveRecord.gem_version) >= Gem::Version.new('5.1.0')}force: :cascade do |t|
-            t.integer "price"
-            t.check_constraint :test_constraint, #{expected_constraint_string}
+      let(:expected_schema) do
+        <<-MIGRATION
+          #{create_table_line_of_schema_file(:prices)}
+            t\.integer "price"
+            t\.check_constraint :test_constraint, #{expected_constraint_string}
           end
         MIGRATION
       end
 
-      it 'includes the check_constraint in the schema file' do
-        schema = File.read(schema_file)
-        expect(schema).to match expected_schema_regex
-      end
+      it { should include_the_constraint_in_the_schema_file }
 
       it 'enforces the constraint' do
         expect { Price.create! price: 999 }.to raise_error(
@@ -51,7 +22,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
         )
       end
     end
-
+    let(:model_class) { 'Price' }
     let(:expected_constraint_error_message) do
       'PG::CheckViolation: ERROR:  new row for relation "prices" violates '\
         'check constraint "test_constraint"'
@@ -71,7 +42,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
 
       context 'when the constraint is a String' do
         let(:constraint) { "'price > 1000'" }
-        let(:expected_constraint_string) { '"(price > 1000)"' }
+        let(:expected_constraint_string) { '"\(price > 1000\)"' }
 
         it_behaves_like 'adds a constraint'
 
@@ -91,11 +62,11 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
           end
 
           it_behaves_like 'adds a constraint' do
-            let(:expected_schema_regex) do
-              Regexp.new <<-MIGRATION.strip_heredoc.indent(2)
-                create_table "prices", force: :cascade do \|t\|
-                  t.integer "price"
-                  t.check_constraint :prices_[0-9]{7,9}, #{expected_constraint_string}
+            let(:expected_schema) do
+              <<-MIGRATION
+                #{create_table_line_of_schema_file(:prices)}
+                  t\.integer "price"
+                  t\.check_constraint :prices_[0-9]{7,9}, #{expected_constraint_string}
                 end
               MIGRATION
             end
@@ -106,7 +77,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
       context 'when the constraint is a Hash' do
         let(:constraint) { { price: [10, 20, 30] } }
         let(:expected_constraint_string) do
-          '"(price = ANY (ARRAY[10, 20, 30]))"'
+          '"\(price = ANY \(ARRAY\[10, 20, 30\]\)\)"'
         end
 
         it_behaves_like 'adds a constraint'
@@ -115,7 +86,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
       context 'when the constraint is an Array' do
         let(:constraint) { ['price > 50', { price: [90, 100] }] }
         let(:expected_constraint_string) do
-          '"((price > 50) AND (price = ANY (ARRAY[90, 100])))"'
+          '"\(\(price > 50\) AND \(price = ANY \(ARRAY\[90, 100\]\)\)\)"'
         end
 
         it_behaves_like 'adds a constraint'
@@ -124,7 +95,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
 
     context 'when using add_check_constraint' do
       let(:constraint) { "'price > 1000'" }
-      let(:expected_constraint_string) { '"(price > 1000)"' }
+      let(:expected_constraint_string) { '"\(price > 1000\)"' }
       let(:content_of_change_method) do
         <<-MIGRATION
           create_table :prices do |t|
@@ -154,7 +125,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
           expect(schema).not_to match(/check_constraint/)
         end
 
-        it 'enforces the constraint' do
+        it 'does not enforce the constraint until we rollback the second migration' do
           create_price = -> { Price.create! price: 999 }
           expect(create_price).not_to raise_error
 
@@ -174,7 +145,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
 
           let(:expected_irreversible_migration_error_message) do
             'To make this migration reversible, pass the constraint to '\
-              'remove_check_constraint, i.e. `remove_check_constraint, '\
+              'remove_check_constraint, i\.e\. `remove_check_constraint '\
               ":prices, :test_constraint, 'price > 999'`"
           end
 
@@ -183,7 +154,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Check do
             expect(schema).not_to match(/check_constraint/)
           end
 
-          it 'enforces the constraint' do
+          it 'does not enforce the constraint' do
             expect { Price.create! price: 999 }.not_to raise_error
 
             # Ensure that we can safely roll back the migration that removed the

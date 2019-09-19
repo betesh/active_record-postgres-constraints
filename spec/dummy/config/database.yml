@@ -9,6 +9,6 @@ development:
 
 test:
   <<: *default
-  database: active_record-postgres-constraints-test
-  migrations_paths: 'spec/dummy/db/migrate'
-
+  database: active_record-postgres-constraints-test<%= ENV['TEST_ENV_NUMBER'] %>
+  migrations_paths:
+    - spec/dummy/db/migrate<%= ENV['TEST_ENV_NUMBER'] %>

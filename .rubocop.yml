@@ -7,10 +7,15 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
     - spec/dummy/db/schema.rb
+    - spec/dummy/db/migrate*/**/*.rb
     - gemfiles/*.gemfile
     - gemfiles/vendor/**/*
+    - vendor/**/*
 
 # Just in case we end up supporting Rails 4.2,
 # we don't want to force a Ruby upgrade.
 Style/ExpandPathArguments:
+  Enabled: false
+
+Style/ImplicitRuntimeError:
   Enabled: false

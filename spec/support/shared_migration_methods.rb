@@ -6,7 +6,7 @@ module SharedMigrationMethods
   end
 
   def migration_dir
-    "#{dummy_dir}/db/migrate/"
+    "#{dummy_dir}/db/migrate#{ENV['TEST_ENV_NUMBER']}"
   end
 
   def delete_all_migration_files
@@ -27,6 +27,7 @@ module SharedMigrationMethods
   def migration_content(migration_name_suffix)
     <<-MIGRATION_CLASS.strip_heredoc
     class Migration#{migration_name_suffix} < ActiveRecord::Migration[5.0]
+      self.verbose = false
       def change\n#{yield.strip_heredoc.indent(10).rstrip}
       end
     end
