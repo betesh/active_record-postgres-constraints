@@ -8,6 +8,14 @@ module ConstraintSupport
   extend RSpec::SharedContext
   extend RSpec::Matchers::DSL
 
+  before(:all) do
+    FileUtils.mkdir_p(migration_dir)
+
+    unless defined?(ActiveRecord::Base.connection.migration_context)
+      ActiveRecord::Tasks::DatabaseTasks.migrations_paths = migration_dir
+    end
+  end
+
   before do
     stub_const(model_class, Class.new(ApplicationRecord))
 

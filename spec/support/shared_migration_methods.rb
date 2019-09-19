@@ -6,7 +6,7 @@ module SharedMigrationMethods
   end
 
   def migration_dir
-    "#{dummy_dir}/db/migrate/"
+    "#{dummy_dir}/db/migrate#{ENV['TEST_ENV_NUMBER']}"
   end
 
   def delete_all_migration_files

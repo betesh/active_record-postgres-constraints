@@ -7,6 +7,7 @@ AllCops:
   TargetRubyVersion: 2.3
   Exclude:
     - spec/dummy/db/schema.rb
+    - spec/dummy/db/migrate*/**/*.rb
     - gemfiles/*.gemfile
     - gemfiles/vendor/**/*
     - vendor/**/*

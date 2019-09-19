@@ -1,8 +1,10 @@
 # frozen_string_literal: true
+
+if defined?(::Rails::Railtie)
   module ActiveRecord
     module Postgres
       module Constraints
-        class Railtie < Rails::Railtie
+        class Railtie < ::Rails::Railtie
           initializer 'active_record.postgres.constraints.patch_active_record' do |*_args|
             engine = self
             ActiveSupport.on_load(:active_record) do
@@ -38,3 +40,4 @@
       end
     end
   end
+end

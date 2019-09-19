@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
-require 'rails_helper'
+require 'spec_helper'
+require 'active_record/postgres/constraints'
 
 RSpec.describe ActiveRecord::Postgres::Constraints do
   it 'has a version number' do
