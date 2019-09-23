@@ -31,6 +31,7 @@ module ConstraintSupport
   after do
     rollback
     delete_all_migration_files
+    wait_for_async_pg_commands_to_finish
   end
 
   after(:all) do

@@ -70,4 +70,17 @@ module SharedMigrationMethods
     end
     dump_schema
   end
+
+  # Taken from https://github.com/ged/ruby-pg/blob/v1.1.4/spec/helpers.rb#L338
+  def wait_for_async_pg_commands_to_finish
+    conn = ActiveRecord::Base.connection.raw_connection
+    loop do
+      conn.consume_input
+      while conn.is_busy
+        select([conn.socket_io], nil, nil, 5.0) || raise('Timeout waiting for query response.')
+        conn.consume_input
+      end
+      break unless conn.get_result
+    end
+  end
 end
