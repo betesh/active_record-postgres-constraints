@@ -21,9 +21,19 @@ module ActiveRecord
               where = conditions.delete(:where)
               where = " WHERE (#{where})" if where
 
+              if conditions.key?(:deferrable)
+                deferrable = conditions.delete(:deferrable)
+                deferrable = case deferrable
+                             when TrueClass
+                               ' DEFERRABLE'
+                             when Symbol
+                               " DEFERRABLE INITIALLY #{deferrable.to_s.upcase}"
+                             end
+              end
+
               conditions = normalize_conditions(conditions).join(', ')
 
-              "CONSTRAINT #{name} EXCLUDE#{using} (#{conditions})#{where}"
+              "CONSTRAINT #{name} EXCLUDE#{using} (#{conditions})#{where}#{deferrable}"
             end
 
             def to_schema_dump(constraint)
@@ -36,8 +46,16 @@ module ActiveRecord
               where = definition.match(/WHERE \((.*)\)/).try(:[], 1)
               where = "where: '#{where}'" if where
 
+              if (deferrable = definition.match(/(NOT\s+)?DEFERRABLE(\s+INITIALLY\s+(DEFERRED|IMMEDIATE))?/))
+                deferrable = if deferrable[3]
+                               "deferrable: :#{deferrable[3].downcase}"
+                             else
+                               'deferrable: true'
+                             end
+              end
+
               exclusions = definition_to_exclusions(definition).join(', ')
-              conditions = "#{using}#{exclusions}#{", #{where}" if where}"
+              conditions = "#{using}#{exclusions}#{", #{where}" if where}#{", #{deferrable}" if deferrable}"
 
               "  t.exclude_constraint :#{name}, #{conditions}"
             end
@@ -50,7 +68,7 @@ module ActiveRecord
 
             def definition_to_exclusions(definition)
               definition.
-                split(' WHERE')[0].
+                split(/ WHERE| (NOT )?DEFERRABLE/)[0].
                 match(/\((.*)/)[1].
                 chomp(')').
                 scan(/((?:[^,(]+|(?:\((?>[^()]+|\g<-1>)*\)))+)/).
