@@ -53,7 +53,9 @@ module ActiveRecord
                 split(' WHERE')[0].
                 match(/\((.*)/)[1].
                 chomp(')').
-                scan(/((?:[^,(]+|(?:\((?>[^()]+|\g<-1>)*\)))+)/).
+                scan(/((?:[^,(]+|(\((?>[^()]+|\g<-1>)*)\))+)/).
+                map!(&:first).
+                map!(&:strip).
                 flatten.
                 map! { |exclusion| element_and_operator(exclusion) }
             end
