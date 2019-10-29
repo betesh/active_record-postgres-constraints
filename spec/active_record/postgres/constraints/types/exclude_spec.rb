@@ -166,6 +166,23 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude, :constraint 
 
           it_behaves_like 'adds a constraint'
         end
+
+        context 'when a field is cast to another type' do
+          let(:constraint) do
+            {
+              using: :gist,
+              'tsrange("from", "to")' => :overlaps,
+              'cast("project_id" AS text)' => :equals,
+            }
+          end
+
+          let(:expected_constraint_string) do
+            'using: :gist, \'tsrange\("from", "to"\)\' => :overlaps, ' \
+              '\'\(\(project_id\)::text\)\' => :equals'
+          end
+
+          it_behaves_like 'adds a constraint'
+        end
       end
     end
 
