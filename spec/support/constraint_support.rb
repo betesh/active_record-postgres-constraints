@@ -48,20 +48,20 @@ module ConstraintSupport
     end
 
     def expected_lines
-      @expected_lines ||= expected_schema.strip_heredoc.split("\n")
+      @expected_lines ||= expected_schema.strip_heredoc.indent(2).split("\n")
     end
 
     match do
       expected_lines.each_with_index do |line, i|
-        expect(schema[i + schema_file_offset]).to match(/#{line}/)
+        expect(schema[i + schema_file_offset]).to match(/\A#{line}\z/)
       end
     end
 
-    failure_message do |_actual|
+    failure_message do
       i = -1
       line_not_found = expected_lines.find do |line|
         i += 1
-        !schema[i + schema_file_offset].match(/#{line}/)
+        !schema[i + schema_file_offset].match(/\A#{line}\z/)
       end
       schema_file_line = schema_file_offset + i
       "Expected line #{schema_file_line} of schema.rb to match:\n" \

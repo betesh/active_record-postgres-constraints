@@ -110,7 +110,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude, :constraint 
                   t\.integer {1,2}"project_id"
                   t\.datetime "from"
                   t\.datetime "to"
-                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"
+                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"#{', using: :btree' unless rails_gte_5_1_0?}
                   t\.exclude_constraint :test_constraint, #{expected_constraint_string}
                 end
               MIGRATION
