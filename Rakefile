@@ -7,4 +7,5 @@ rescue LoadError
 end
 
 require 'bundler/gem_tasks'
+require 'parallel_tests/tasks'
 task default: :spec
