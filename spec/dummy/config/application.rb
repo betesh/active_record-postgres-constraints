@@ -2,7 +2,8 @@
 
 require_relative 'boot'
 
-require 'rails/all'
+require 'active_model/railtie'
+require 'active_record/railtie'
 
 Bundler.require(*Rails.groups)
 require 'active_record/postgres/constraints'
