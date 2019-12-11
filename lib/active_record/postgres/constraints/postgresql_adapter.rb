@@ -28,7 +28,7 @@ module ActiveRecord
 
         def constraints(table)
           types = CONSTRAINT_TYPES.values.map { |v| "'#{v}'" }.join(', ')
-          sql = "SELECT conname, consrc, contype,
+          sql = "SELECT conname, contype,
             pg_get_constraintdef(pg_constraint.oid) AS definition
             FROM pg_constraint
             JOIN pg_class ON pg_constraint.conrelid = pg_class.oid
