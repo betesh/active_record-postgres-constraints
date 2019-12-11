@@ -2,6 +2,11 @@ env:
   - BUNDLE_DISABLE_EXEC_LOAD=true # Based on https://github.com/grosser/parallel_tests/issues/649#issuecomment-487100470
 addons:
   postgresql: "9.6"
+env:
+  - POSTGRESQL_VERSION=9.6
+  - POSTGRESQL_VERSION=10.11
+  - POSTGRESQL_VERSION=11.6
+  - POSTGRESQL_VERSION=12.1
 rvm:
   - 2.3.0
   - 2.4.0
@@ -19,6 +24,7 @@ matrix:
   - rvm: 2.4.0
     gemfile: gemfiles/rails_6.0.gemfile
 before_install:
+  - sudo service postgresql stop && sudo service postgresql start $POSTGRESQL_VERSION
   - gem install --force bundler -v 1.17.3
 script:
   - bundle _1.17.3_ exec rubocop
