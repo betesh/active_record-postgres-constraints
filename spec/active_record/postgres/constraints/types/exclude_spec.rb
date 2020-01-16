@@ -110,7 +110,7 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude, :constraint 
                   t\.integer {1,2}"project_id"
                   t\.datetime "from"
                   t\.datetime "to"
-                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"
+                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"#{', using: :btree' unless rails_gte_5_1_0?}
                   t\.exclude_constraint :test_constraint, #{expected_constraint_string}
                 end
               MIGRATION
@@ -163,6 +163,23 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude, :constraint 
           let(:where_clause) { true }
           let(:constraint) { super().merge(where: 'project_id <> 1') }
           let(:expected_constraint_string) { "#{super()}, where: '\\(project_id <> 1\\)'" }
+
+          it_behaves_like 'adds a constraint'
+        end
+
+        context 'when a field is cast to another type' do
+          let(:constraint) do
+            {
+              using: :gist,
+              'tsrange("from", "to")' => :overlaps,
+              'cast("project_id" AS text)' => :equals,
+            }
+          end
+
+          let(:expected_constraint_string) do
+            'using: :gist, \'tsrange\("from", "to"\)\' => :overlaps, ' \
+              '\'\(\(project_id\)::text\)\' => :equals'
+          end
 
           it_behaves_like 'adds a constraint'
         end

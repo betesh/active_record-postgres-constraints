@@ -19,7 +19,7 @@ module ActiveRecord
           return unless indexes.any?
 
           index_statements = indexes.map do |index|
-            "  t.index #{index_parts(index).join(', ')}"
+            "    t.index #{index_parts(index).join(', ')}"
           end
           stream.puts index_statements.sort.join("\n")
         end
