@@ -74,7 +74,7 @@ remove_exclude_constraint :booking, using: :gist, 'tsrange("from", "to")' => :ov
 
 #### Constrainsts with custom conditions
 
-if you need custom/complex conditions of any sort, you can even use string conditions:
+If you need custom/complex conditions of any sort, you can even use string conditions:
 
 ```ruby
 create_table :people do |t|
