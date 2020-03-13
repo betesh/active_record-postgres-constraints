@@ -72,6 +72,17 @@ remove_exclude_constraint :booking
 remove_exclude_constraint :booking, using: :gist, 'tsrange("from", "to")' => :overlaps, room_id: :equals
 ```
 
+#### Constrainsts with custom conditions
+
+If you need custom/complex conditions of any sort, you can even use string conditions:
+
+```ruby
+create_table :people do |t|
+  t.string :title
+  t.check_constraint "title IS NULL OR title IN ['Mr.', 'Mrs.', 'Dr.']"
+end
+```
+
 ## Installation
 Add this line to your application's Gemfile:
 
