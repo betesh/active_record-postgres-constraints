@@ -1,12 +1,10 @@
 env:
   - BUNDLE_DISABLE_EXEC_LOAD=true # Based on https://github.com/grosser/parallel_tests/issues/649#issuecomment-487100470
-addons:
-  postgresql: "9.6"
 env:
   - POSTGRESQL_VERSION=9.6
-  - POSTGRESQL_VERSION=10.11
-  - POSTGRESQL_VERSION=11.6
-  - POSTGRESQL_VERSION=12.1
+  - POSTGRESQL_VERSION=10
+  - POSTGRESQL_VERSION=11
+  - POSTGRESQL_VERSION=12
 rvm:
   - 2.3.0
   - 2.4.0
@@ -24,7 +22,18 @@ matrix:
   - rvm: 2.4.0
     gemfile: gemfiles/rails_6.0.gemfile
 before_install:
-  - sudo service postgresql stop && sudo service postgresql start $POSTGRESQL_VERSION
+  - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+  - echo "deb http://apt.postgresql.org/pub/repos/apt/ `lsb_release -cs`-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+  - sudo apt update
+  - sudo apt install -yq --no-install-suggests --no-install-recommends postgresql-${POSTGRESQL_VERSION} postgresql-client-${INSTALL_VERSION}
+  - sudo sed -ri 's/^port.*/port = 5432/' /etc/postgresql/${POSTGRESQL_VERSION}/main/postgresql.conf
+  - sudo sed -ri 's/peer/trust/' /etc/postgresql/${POSTGRESQL_VERSION}/main/pg_hba.conf
+  - sudo /etc/init.d/postgresql stop
+  - sudo systemctl start postgresql@${POSTGRESQL_VERSION}-main.service || (systemctl status postgresql.service; sudo journalctl -xe; exit 1)
+  - pg_lsclusters -h
+  - /usr/lib/postgresql/${POSTGRESQL_VERSION}/bin/psql -U postgres -c 'SHOW server_version;'
+  - /usr/lib/postgresql/${POSTGRESQL_VERSION}/bin/psql -U postgres -c 'SHOW server_version;' | grep -P "(?<"'!'"[0-9.])${INSTALL_VERSION}"
+  - /usr/lib/postgresql/${POSTGRESQL_VERSION}/bin/psql -U postgres -c "SELECT * FROM pg_catalog.pg_roles where rolname = 'travis'" | grep travis || /usr/lib/postgresql/${POSTGRESQL_VERSION}/bin/psql -U postgres -c 'CREATE ROLE travis SUPERUSER LOGIN CREATEDB'
   - gem install --force bundler -v 1.17.3
 script:
   - bundle _1.17.3_ exec rubocop
