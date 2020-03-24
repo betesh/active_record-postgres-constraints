@@ -1,10 +1,13 @@
 env:
-  - BUNDLE_DISABLE_EXEC_LOAD=true # Based on https://github.com/grosser/parallel_tests/issues/649#issuecomment-487100470
-env:
+  # Based on https://github.com/grosser/parallel_tests/issues/649#issuecomment-487100470
   - POSTGRESQL_VERSION=9.6
+    BUNDLE_DISABLE_EXEC_LOAD=true
   - POSTGRESQL_VERSION=10
+    BUNDLE_DISABLE_EXEC_LOAD=true
   - POSTGRESQL_VERSION=11
+    BUNDLE_DISABLE_EXEC_LOAD=true
   - POSTGRESQL_VERSION=12
+    BUNDLE_DISABLE_EXEC_LOAD=true
 rvm:
   - 2.3.0
   - 2.4.0
