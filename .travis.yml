@@ -39,4 +39,4 @@ script:
   - bundle _1.17.3_ exec rubocop
   - sh -c 'cd spec/dummy && bundle _1.17.3_ exec bin/rake db:reset'
   - sh -c 'cd spec/dummy && bundle _1.17.3_ exec bin/rake parallel:create[3]'
-  - bundle _1.17.3_ exec rake parallel:rake[default,3]
+  - bundle _1.17.3_ exec rspec
