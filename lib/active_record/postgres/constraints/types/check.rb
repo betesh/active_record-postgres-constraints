@@ -14,7 +14,7 @@ module ActiveRecord
 
             def to_schema_dump(constraint)
               name = constraint['conname']
-              conditions = constraint['consrc']
+              conditions = constraint['definition'].gsub(/^CHECK\s*\((.*)\)\s*$/, '\\1')
               "    t.check_constraint :#{name}, #{conditions.inspect}"
             end
 
