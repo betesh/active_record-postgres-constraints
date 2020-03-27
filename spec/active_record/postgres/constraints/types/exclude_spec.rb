@@ -104,13 +104,14 @@ RSpec.describe ActiveRecord::Postgres::Constraints::Types::Exclude, :constraint 
 
           it_behaves_like 'adds a constraint' do
             let(:expected_schema) do
+              using_btree = ', using: :btree' unless rails_gte_5_1_0?
               <<-MIGRATION
 
                 #{create_table_line_of_schema_file(:phases)}
                   t\.integer {1,2}"project_id"
                   t\.datetime "from"
                   t\.datetime "to"
-                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"#{', using: :btree' unless rails_gte_5_1_0?}
+                  t\.index \\["project_id", "from"\\], name: "index_phases_on_project_id_and_from"#{using_btree}
                   t\.exclude_constraint :test_constraint, #{expected_constraint_string}
                 end
               MIGRATION
