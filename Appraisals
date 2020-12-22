@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 appraise 'rails-5.0' do
+  gem 'pg', '< 1.0'
   gem 'rails', '~> 5.0.7'
 end
 
 appraise 'rails-5.1' do
+  gem 'pg', '< 1.0'
   gem 'rails', '~> 5.1.6'
 end
 
