@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.email = ['iybetesh@gmail.com']
   s.homepage = 'https://github.com/betesh/active_record-postgres-constraints'
   s.summary = 'Store your constraints in db/schema.rb'
+  s.required_ruby_version = '>= 2.5', '< 4'
   s.description = %(
     From http://edgeguides.rubyonrails.org/active_record_migrations.html#types-of-schema-dumps:
 
