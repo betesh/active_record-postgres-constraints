@@ -23,5 +23,7 @@ group :test do
   gem 'simplecov', require: false
 end
 
+gem 'nio4r', '< 2.5.3' # To remain compatible with Ruby < 2.4
+gem 'parallel', '< 1.20' # To remain compatible with Ruby < 2.4
 gem 'simplecov-html', '< 0.11', require: false # To remain compatible with Ruby < 2.4
 gem 'sprockets', '< 4' # To remain compatible with Ruby < 2.5
