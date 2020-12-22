@@ -206,7 +206,7 @@ DEPENDENCIES
   osm-rubocop (= 0.1.16)
   parallel_tests
   pg (< 1.0)
-  rails (~> 6.0.0.rc2)
+  rails (~> 6.0.3)
   rspec (~> 3.8)
   rspec-rails
   simplecov
