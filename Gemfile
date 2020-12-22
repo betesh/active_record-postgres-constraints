@@ -16,7 +16,6 @@ gemspec
 gem 'byebug', '< 11.1.0', group: [:development, :test] # 11.1.0+ requires Ruby 2.4.0+
 
 gem 'parallel_tests'
-gem 'pg', '< 1.0' # Higher versions are not compatible with Rails 5.1
 
 group :test do
   gem 'appraisal'
