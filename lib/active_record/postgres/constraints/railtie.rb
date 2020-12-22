@@ -9,6 +9,11 @@ if defined?(::Rails::Railtie)
             engine = self
             ActiveSupport.on_load(:active_record) do
               AR_CAS = ::ActiveRecord::ConnectionAdapters
+              AR_CAS_SCHEMA_CREATION = if defined?(AR_CAS::AbstractAdapter::SchemaCreation)
+                AR_CAS::AbstractAdapter::SchemaCreation
+              else
+                AR_CAS::SchemaCreation
+              end
 
               engine.apply_patch! if engine.pg?
             end
@@ -20,7 +25,7 @@ if defined?(::Rails::Railtie)
             end
             AR_CAS::TableDefinition.include TableDefinition
             AR_CAS::PostgreSQLAdapter.include PostgreSQLAdapter
-            AR_CAS::AbstractAdapter::SchemaCreation.prepend SchemaCreation
+            AR_CAS_SCHEMA_CREATION.prepend SchemaCreation
 
             ::ActiveRecord::Migration::CommandRecorder.include CommandRecorder
             ::ActiveRecord::SchemaDumper.prepend SchemaDumper
