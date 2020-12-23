@@ -1,5 +1,5 @@
 [![Gem Version](https://badge.fury.io/rb/active_record-postgres-constraints.svg)](https://badge.fury.io/rb/active_record-postgres-constraints)
-[![Build Status](https://secure.travis-ci.org/on-site/active_record-postgres-constraints.svg?branch=master)](http://travis-ci.org/on-site/active_record-postgres-constraints)
+[![Build Status](https://www.travis-ci.com/betesh/active_record-postgres-constraints.svg?branch=master)](http://travis-ci.org/on-site/active_record-postgres-constraints)
 
 # ActiveRecord::Postgres::Constraints
 

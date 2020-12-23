@@ -10,8 +10,8 @@ Gem::Specification.new do |s|
   s.name = 'active_record-postgres-constraints'
   s.version = ActiveRecord::Postgres::Constraints::VERSION
   s.authors = ['Isaac Betesh']
-  s.email = ['ibetesh@on-site.com']
-  s.homepage = 'https://github.com/on-site/active_record-postgres-constraints'
+  s.email = ['iybetesh@gmail.com']
+  s.homepage = 'https://github.com/betesh/active_record-postgres-constraints'
   s.summary = 'Store your constraints in db/schema.rb'
   s.description = %(
     From http://edgeguides.rubyonrails.org/active_record_migrations.html#types-of-schema-dumps:
