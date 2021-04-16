@@ -138,10 +138,6 @@ GEM
       thor (>= 0.20.3, < 2.0)
     rainbow (3.0.0)
     rake (13.0.3)
-    rspec (3.10.0)
-      rspec-core (~> 3.10.0)
-      rspec-expectations (~> 3.10.0)
-      rspec-mocks (~> 3.10.0)
     rspec-core (3.10.1)
       rspec-support (~> 3.10.0)
     rspec-expectations (3.10.1)
@@ -206,7 +202,6 @@ DEPENDENCIES
   osm-rubocop (= 0.1.16)
   parallel_tests
   rails (~> 6.0.3)
-  rspec (~> 3.8)
   rspec-rails
   simplecov
   simplecov-html (< 0.11)
